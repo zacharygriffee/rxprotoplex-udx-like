@@ -5,11 +5,13 @@ import {
     createPortPool, getInterfaceOfId,
     getWebSocketURL, networkInterfaceConnected$,
     resetStore,
-    webSocketServer
+    webSocketServer,
+    store, idOf
 } from "rxprotoplex-peers";
 import {UDX} from "../lib/udx.js";
 import b4a from "b4a";
 import {firstValueFrom} from "rxjs";
+import {NetworkInterfaces} from "../lib/network-interfaces.js";
 const portPool = createPortPool(20000, 30000);
 
 async function useWebServer(cb, t) {
@@ -69,11 +71,20 @@ test("Test UDXSocket", async t => {
 });
 
 test("Test UDXStream", async t => {
-    t.plan(2);
+    t.plan(8);
 
     await useServerAndTwoInterfaces(async (nicA, nicB) => {
         const udx1 = new UDX({ localInterface: nicA });
         const udx2 = new UDX({ localInterface: nicB });
+
+        const testNetworkInterfaces = udx1.networkInterfaces();
+
+        t.is(idOf(nicA), testNetworkInterfaces[0].name);
+        t.is(idOf(nicB), testNetworkInterfaces[1].name);
+        t.is(nicA.ip, testNetworkInterfaces[0].host);
+        t.is(nicB.ip, testNetworkInterfaces[1].host);
+        t.is(testNetworkInterfaces[0].internal && testNetworkInterfaces[1].internal, false, "internal is always false for now");
+        t.is(testNetworkInterfaces[0].family + testNetworkInterfaces[1].family, 8, "family is always ip4");
 
         const sock1 = udx1.createSocket();
         const sock2 = udx2.createSocket();
@@ -121,4 +132,6 @@ test("Test UDXStream", async t => {
         });
     }, t);
 });
+
+
 

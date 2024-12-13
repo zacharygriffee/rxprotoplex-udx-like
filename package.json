@@ -1,6 +1,6 @@
 {
   "name": "rxprotoplex-udx-like",
-  "version": "0.0.1-alpha",
+  "version": "0.0.2-alpha",
   "description": "A implementation of UDX-like streams and sockets with RxJS and Protoplex.",
   "main": "index.js",
   "type": "module",
@@ -11,7 +11,7 @@
     "b4a": "^1.6.7",
     "eventemitter3": "^5.0.1",
     "rxjs": "^7.8.1",
-    "rxprotoplex-peers": "^0.0.7",
+    "rxprotoplex-peers": "^0.0.8",
     "streamx": "^2.21.1"
   },
   "devDependencies": {
