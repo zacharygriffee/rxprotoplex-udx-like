@@ -1,0 +1,36 @@
+{
+  "name": "rxprotoplex-udx-like",
+  "version": "0.0.1-alpha",
+  "description": "A implementation of UDX-like streams and sockets with RxJS and Protoplex.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "brittle"
+  },
+  "dependencies": {
+    "b4a": "^1.6.7",
+    "eventemitter3": "^5.0.1",
+    "rxjs": "^7.8.1",
+    "rxprotoplex-peers": "^0.0.7",
+    "streamx": "^2.21.1"
+  },
+  "devDependencies": {
+    "brittle": "^3.7.0",
+    "ws": "^8.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-repo/rxprotoplex-udx-like.git"
+  },
+  "keywords": [
+    "udx",
+    "rxjs",
+    "protoplex",
+    "networking",
+    "streams",
+    "alpha"
+  ],
+  "author": "Zachary Griffee <zacharygriffee@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/your-repo/rxprotoplex-udx-like#readme"
+}
