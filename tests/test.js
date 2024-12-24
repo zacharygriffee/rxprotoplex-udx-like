@@ -1,71 +1,25 @@
-import {test, solo} from "brittle";
-import {WebSocketServer} from "ws";
-import {
-    addWebSocketNetworkInterface, closeInterface,
-    createPortPool, getInterfaceOfId,
-    getWebSocketURL, networkInterfaceConnected$,
-    resetStore,
-    webSocketServer,
-    store, idOf
-} from "rxprotoplex-peers";
+import {test} from "brittle";
+import {idOf} from "rxprotoplex-peers";
 import {UDX} from "../lib/udx.js";
 import b4a from "b4a";
-import {firstValueFrom} from "rxjs";
-import {NetworkInterfaces} from "../lib/network-interfaces.js";
-const portPool = createPortPool(20000, 30000);
 
-async function useWebServer(cb, t) {
-    const port = portPool.allocate();
-    const wss = new WebSocketServer({ port });
-    await new Promise((resolve) => wss.once("listening", resolve));
-    console.log(`Web socket server listening on ${port}`);
-    const wsUrl = getWebSocketURL(wss);
-    const server$ = webSocketServer(wss);
-    await cb(wsUrl);
-    wss.close();
-    t?.teardown?.(async () => {
-        wss.close();
-        server$.close$.next();
-        portPool.release(port);
-        resetStore();
-    });
-}
-
-async function useTwoInterfaces(wsUrl, cb, t) {
-    const a = addWebSocketNetworkInterface(wsUrl);
-    const b = addWebSocketNetworkInterface(wsUrl);
-
-    const [aa, bb] = await Promise.all(
-        [
-            firstValueFrom(networkInterfaceConnected$(a)),
-            firstValueFrom(networkInterfaceConnected$(b))
-        ]
-    )
-
-    await cb(aa, bb);
-    t.teardown(() => {
-        closeInterface(a);
-        closeInterface(b);
-    });
-}
-
-async function useServerAndTwoInterfaces(cb, t) {
-    await useWebServer(wsUrl => useTwoInterfaces(wsUrl, cb, t), t);
-}
+import {useServerAndOneInterface} from "./fixtures/useServerAndOneInterface.js";
+import {useServerAndTwoInterfaces} from "./fixtures/useServerAndTwoInterfaces.js";
 
 test("Test UDXSocket", async t => {
+    // not working. the socket tests are working but not this.
     t.plan(1)
     const udx1 = new UDX();
     const udx2 = new UDX();
 
-    await useServerAndTwoInterfaces((nicA, nicB) => {
+    await useServerAndOneInterface((nicA, nicB) => {
         const sock1 = udx1.createSocket();
         const sock2 = udx2.createSocket();
         sock1.bind(1234);
         sock1.on("message", test => {
             t.is(b4a.toString(test), "hello");
         });
-        sock2.send(b4a.from("hello"), 1234, nicA.ip);
+        sock2.send(b4a.from("hello"), 1234);
         t.teardown(() => sock1.close() && sock2.close());
     }, t);
 });
@@ -77,7 +31,7 @@ test("Test UDXStream", async t => {
         const udx1 = new UDX({ localInterface: nicA });
         const udx2 = new UDX({ localInterface: nicB });
 
-        const testNetworkInterfaces = udx1.networkInterfaces();
+        const testNetworkInterfaces = udx1.networkInterfaces().filter(o => !o.internal);
 
         t.is(idOf(nicA), testNetworkInterfaces[0].name);
         t.is(idOf(nicB), testNetworkInterfaces[1].name);
@@ -133,5 +87,6 @@ test("Test UDXStream", async t => {
     }, t);
 });
 
+// await import("./socket.test.js");
 
 
